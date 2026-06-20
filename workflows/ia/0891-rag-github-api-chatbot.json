@@ -1,0 +1,432 @@
+{
+  "name": "Chat with GitHub OpenAPI Specification using RAG (Pinecone and OpenAI)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "6ea403b5-2243-45a7-85ad-f42e5e1d8313",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        832,
+        272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/github/rest-api-description/refs/heads/main/descriptions/api.github.com/api.github.com.json",
+        "options": {}
+      },
+      "id": "24ea1a6e-7904-4bd2-8c29-f2a20f92f75a",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1120,
+        272
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "mode": "list",
+          "value": "n8n-demo",
+          "cachedResultName": "n8n-demo"
+        },
+        "options": {}
+      },
+      "id": "4b6872ab-8682-440e-9d16-3fd99458d2ca",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        1344,
+        272
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pineconeApi": {
+          "id": "ikpGW1Ybj2O98Zkc",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "602cc793-310f-45df-b449-581fccc5ff53",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        1488,
+        448
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "0b7f52c2-e257-4888-a080-f3790d61c875",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "position": [
+        1568,
+        624
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "10f00756-9f6b-4f21-871f-cc15aa1f8ee7",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        800,
+        1024
+      ],
+      "webhookId": "089e38ab-4eee-4c34-aa5d-54cf4a8f53b7",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant providing information about the GitHub API and how to use it based on the OpenAPI V3 specifications."
+        }
+      },
+      "id": "70289c20-746f-4837-808f-81dd51750356",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1152,
+        1024
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "id": "7fc65b35-e3c0-4a3c-a033-c853f85fa84d",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1040,
+        1248
+      ],
+      "typeVersion": 1.1,
+      "credentials": {
+        "openAiApi": {
+          "id": "tVClKvfWehLq0QRn",
+          "name": "OpenAI based Nvidia"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "4c5ff988-0fd1-452f-885e-34a66d3b41ab",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        1248,
+        1280
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "name": "GitHub_OpenAPI_Specification",
+        "description": "Use this tool to get information about the GitHub API. This database contains OpenAPI v3 specifications."
+      },
+      "id": "b5167b2c-d467-419d-9f0b-3e20df3adeae",
+      "name": "Vector Store Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "position": [
+        1408,
+        1248
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "id": "8c9cc41b-50c1-4d20-a8f2-34bc078272a0",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1664,
+        1424
+      ],
+      "typeVersion": 1.1,
+      "credentials": {
+        "openAiApi": {
+          "id": "tVClKvfWehLq0QRn",
+          "name": "OpenAI based Nvidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Indexing content in the vector database\nThis part of the workflow is responsible for extracting content, generating embeddings and sending them to the Pinecone vector store.\n\nIt requests the OpenAPI specifications from GitHub using a HTTP request. Then, it splits the file in chunks, generating embeddings for each chunk using OpenAI, and saving them in Pinecone vector DB.",
+        "height": 200,
+        "width": 640
+      },
+      "id": "067b89af-c151-4875-a312-0d23dfe71607",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        784,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Querying and response generation \n\nThis part of the workflow is responsible for the chat interface, querying the vector store and generating relevant responses.\n\nIt uses OpenAI GPT 4o-mini to generate responses.",
+        "width": 580
+      },
+      "id": "ff3048af-961b-410c-b111-6d6a8d57bc94",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        800,
+        832
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nv-embed-v1",
+        "options": {}
+      },
+      "id": "dd578619-66b2-46e4-b376-6c0b014d66f5",
+      "name": "Generate User Query Embedding",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "position": [
+        1312,
+        1664
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "tVClKvfWehLq0QRn",
+          "name": "OpenAI based Nvidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "mode": "list",
+          "value": "n8n-demo",
+          "cachedResultName": "n8n-demo"
+        },
+        "options": {}
+      },
+      "id": "d8641593-7cc2-4c87-85ec-463f9f970452",
+      "name": "Pinecone Vector Store (Querying)",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        1264,
+        1488
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pineconeApi": {
+          "id": "ikpGW1Ybj2O98Zkc",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nv-embed-v1",
+        "options": {}
+      },
+      "id": "e06b0722-6ad1-46af-a18a-e83faaa84873",
+      "name": "Generate Embeddings",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "position": [
+        1312,
+        480
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "tVClKvfWehLq0QRn",
+          "name": "OpenAI based Nvidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## RAG workflow in n8n\n\nThis is an example of how to use RAG techniques to create a chatbot with n8n. It is an API documentation chatbot that can answer questions about the GitHub API. It uses OpenAI for generating embeddings, the gpt-4o-mini LLM for generating responses and Pinecone as a vector database.\n\n### Before using this template\n* create OpenAI and Pinecone accounts\n* obtain API keys OpenAI and Pinecone \n* configure credentials in n8n for both\n* ensure you have a Pinecone index named \"n8n-demo\" or adjust the workflow accordingly.",
+        "height": 320,
+        "width": 620
+      },
+      "id": "b8dbbd1d-ec66-4696-aa1e-af8bf2dbbd72",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate User Query Embedding": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store (Querying)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store (Querying)": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "87e2cbc4-35ab-40c8-a09e-0d190c4f5bcb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cae6501d0911946929ba2443934fa79b4a9266c9b09501eea322d59b2ca1b969"
+  },
+  "id": "fJvsrevskSccrP8b",
+  "tags": []
+}

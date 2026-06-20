@@ -1,0 +1,103 @@
+{
+  "name": "speech-recognition-wit-ai",
+  "nodes": [
+    {
+      "parameters": {
+        "filePath": "/home/node/.n8n-files/demo-speech.wav"
+      },
+      "name": "Read Binary File",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "2e879f32-c5dd-4f53-81a2-e0045df83c8f"
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "requestMethod": "POST",
+        "url": "https://api.wit.ai/speech?v=20260531",
+        "allowUnauthorizedCerts": true,
+        "jsonParameters": true,
+        "options": {
+          "bodyContentType": "raw"
+        },
+        "sendBinaryData": true,
+        "binaryPropertyName": "=data",
+        "headerParametersJson": "={{JSON.parse('{\"Authorization\":\"Bearer KAA7UUYUOHPGNQPAWCUS47RMJK3QR5YU\", \"Content-Type\":\"audio/wav\"}')}}",
+        "queryParametersJson": "="
+      },
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        208,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "b053a408-5edf-46de-adfd-6ad9685334ec",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "MJGfzadqDlMGgyjJ",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        0
+      ],
+      "id": "01635826-c03d-4e7f-9e0b-db1f795892a5",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Read Binary File": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read Binary File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2c686916-9dae-4a61-961f-13cf401377b3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cae6501d0911946929ba2443934fa79b4a9266c9b09501eea322d59b2ca1b969"
+  },
+  "id": "ZSu7R8cwRP1IJXVV",
+  "tags": []
+}
