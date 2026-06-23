@@ -1,0 +1,356 @@
+{
+  "name": "feedback-openai-google",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Send customer feedback to OpenAI for sentiment analysis",
+        "height": 342,
+        "width": 253
+      },
+      "id": "11f772aa-0019-4692-b02e-651d8eecd5fd",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Add new feedback to google sheets",
+        "height": 342,
+        "width": 253
+      },
+      "id": "ab334766-1f5b-41f2-81a2-80f8e0a453d1",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        768,
+        160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Instructions\n1. Connect Google sheets\n2. Connect your OpenAi account (api key + org Id)\n3. Create a customer feedback form, use an existing one or use the one below as example. \nAll set!\n\n\n- Here is the example google sheet being used in this workflow: https://docs.google.com/spreadsheets/d/1omWdRbiT6z6GNZ6JClu9gEsRhPQ6J0EJ2yXyFH9Zng4/edit?usp=sharing. You can download it to your account.",
+        "height": 254,
+        "width": 1407
+      },
+      "id": "3670be22-f981-4562-be6a-14336883647d",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        592
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Feedback form is submitted",
+        "height": 342,
+        "width": 253
+      },
+      "id": "acee1d2d-41b4-4395-ac4f-ca94abb96369",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        144
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Merge form data and OpenAI result",
+        "height": 342,
+        "width": 253
+      },
+      "id": "e04284b4-470c-4086-a659-ac5b920e51fc",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1FShdmiit1ld0hJF5hoRVvKUWw8BeTMdnVymGR4rhoGY",
+          "mode": "list",
+          "cachedResultName": "Copia de CustomerFeedback",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FShdmiit1ld0hJF5hoRVvKUWw8BeTMdnVymGR4rhoGY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1omWdRbiT6z6GNZ6JClu9gEsRhPQ6J0EJ2yXyFH9Zng4/edit#gid=0",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "value": {
+            "Category": "={{ $json['What is your feedback about?'] }}",
+            "Sentiment": "={{ $json.text }}",
+            "Timestamp": "={{ $json.submittedAt }}",
+            "Entered by": "=Form",
+            "Customer Name": "={{ $json.Name }}",
+            "Customer contact": "={{ $json['How do we get in touch with you?'] }}",
+            "Customer Feedback": "={{ $json['Your feedback'] }}"
+          },
+          "schema": [
+            {
+              "id": "Timestamp",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Timestamp",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Category",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Customer Feedback",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Customer Feedback",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Customer Name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Customer Name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Customer contact",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Customer contact",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Entered by",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Entered by",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Urgent?",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Urgent?",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sentiment",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Sentiment",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": []
+        },
+        "options": {}
+      },
+      "id": "6837b617-1fa6-450c-b02c-afd528ebd942",
+      "name": "Add customer feedback to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        832,
+        304
+      ],
+      "typeVersion": 4.1,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "6FRjeFZe9p7rf87n",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "multiplex",
+        "options": {}
+      },
+      "id": "8b12fa7e-2d4e-4a67-a2bc-7b9ad8e6cdd0",
+      "name": "Merge sentiment with form content",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        480,
+        304
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "path": "39025ee2-0d68-481f-854c-4fcb185e3fb3",
+        "formTitle": "Customer Feedback",
+        "formDescription": "Please give feedback about our company orproducts.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "What is your feedback about?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Product"
+                  },
+                  {
+                    "option": "Service"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Your feedback",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "How do we get in touch with you?"
+            }
+          ]
+        },
+        "options": {
+          "formSubmittedText": "Your response has been recorded"
+        }
+      },
+      "id": "716b8b73-574a-44fb-a2fb-1ab1ef7afa20",
+      "name": "Submit form with customer feedback",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        -336,
+        320
+      ],
+      "webhookId": "39025ee2-0d68-481f-854c-4fcb185e3fb3",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Classify the sentiment in the following customer feedback: {{ $json['Your feedback'] }}"
+            },
+            {
+              "role": "system",
+              "content": "You are a sentiment analysis assistant. Classify customer feedback as Positive, Negative or Neutral. Respond with only one word."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        16,
+        176
+      ],
+      "id": "6a5bdc98-6fca-41af-9f88-6966be70a3f2",
+      "name": "Message a model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "LVEjusdyujLxakJf",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Merge sentiment with form content": {
+      "main": [
+        [
+          {
+            "node": "Add customer feedback to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit form with customer feedback": {
+      "main": [
+        [
+          {
+            "node": "Merge sentiment with form content",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Merge sentiment with form content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
