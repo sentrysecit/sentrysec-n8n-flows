@@ -249,4 +249,204 @@ los registros se actualizaron, archivaron y purgaron de manera sincronizada en l
 #### No funcional: 
 El flujo no es funcional principalmente porque tiene componentes críticos apagados (disabled: true), como el webhook automático, las consultas a la base de datos Postgres y el envío por Gmail, lo que corta por completo la ruta de análisis histórico. Además, el nodo de condición Unknown threat? está incompleto al no definir contra qué comparar las variables de GreyNoise. Por último, existen errores en el mapeo de variables (como llamar context_ip a un campo guardado como ip), lo que causaría que los nodos posteriores procesen datos vacíos y fallen durante la ejecución.
 
+---
+
+## 00853-fine-tuning-openai-with-drive
+
+
+#### No funcional: 
+Este workflow fue diseñado para automatizar la creación de modelos Fine-Tuned de OpenAI a partir de un archivo .jsonl almacenado en Google Drive. Sin embargo, OpenAI ya no permite crear nuevos trabajos de fine-tuning para organizaciones nuevas, por lo que el nodo Create Fine-tuning Job devuelve un error y el flujo ya no puede generar modelos personalizados nuevos. Los modelos Fine-Tuned creados anteriormente siguen funcionando, pero para proyectos nuevos se recomienda utilizar soluciones RAG con bases vectoriales y documentos.
+
+---
+
+## 07167-deteccion_objetos_gemini
+
+
+#### No funcional: 
+Este workflow fue diseñado específicamente para Google Gemini debido a su capacidad de detectar objetos y devolver coordenadas precisas (bounding boxes). Se intentó reemplazar Gemini por modelos de visión de NVIDIA para evitar problemas de cuota y acceso, pero estos no generaban las coordenadas necesarias para el resto del flujo, por lo que la detección y el dibujo de las cajas no podían completarse correctamente. Actualmente el workflow requiere acceso funcional a la API de Gemini para operar como fue diseñado.
+
+---
+
+## 09183-build-your-first-ai-agent.json
+
+## 2. ¿que hace este flujo de trabajo?
+
+El workflow implementa un agente capaz de:
+
+- Recibir mensajes desde un chat
+- Interpretar la intención del usuario
+- Seleccionar y ejecutar herramientas automáticamente
+- Recuperar información en tiempo real (clima, noticias)
+- Responder de forma conversacional manteniendo contexto
+
+### Evidencias
+
+## Prueba 1 — Consulta de clima (Get Weather)
+
+**Objetivo:** Consultar el clima y pronóstico para Manizales usando Open-Meteo.
+
+**Interacción:**
+
+```text
+Usuario: ¿Qué clima está haciendo en Manizales?
+Agente: ¿Qué información climática necesita (resumen diario, pronóstico por horas, temperaturas, precipitación)?
+Usuario: El pronóstico de hoy.
+```
+
+**Resultado:** El agente solicitó aclaración y luego devolvió:
+
+- Temperatura máxima
+- Temperatura mínima
+- Precipitación
+- Condiciones climáticas
+- Resumen horario
+
+![alt text](image.png)
+
+## Prueba 2 — Consulta de noticias (Get News)
+
+**Objetivo:** Validar la lectura de feeds RSS configurados.
+
+**Interacción:**
+
+```text
+Usuario: ¿Qué noticias nuevas hay el día de hoy en Manizales?
+Agente: No hay feeds locales de Manizales configurados; puedo consultar los feeds RSS disponibles. ¿Qué categoría desea?
+```
+
+![alt text](image-1.png)
+
+
+## Prueba 3 — RSS específico (MedlinePlus)
+
+**Objetivo:** Validar la lectura correcta de un feed RSS funcional (MedlinePlus).
+
+**Interacción:**
+
+```text
+Usuario: Busca alguna noticia de MedlinePlus
+```
+
+![alt text](image-2.png)
+
+
+---
+
+
+
+### 00286-slack-gilfoyle-chatbot
+
+### Que hace el flujo de trabajo?
+implementa un chatbot de Slack con la personalidad de Gilfoyle, que utiliza un agente de IA equipado con un modelo gpt-4o-mini y herramientas de búsqueda (SerpAPI y Wikipedia) para responder consultas. El sistema comienza con un nodo Webhook que recibe mensajes de Slack, donde un nodo "If" filtra automáticamente cualquier interacción proveniente de bots para evitar bucles; posteriormente, el mensaje del usuario se procesa manteniendo un historial de conversación basado en el ID del canal mediante un nodo de memoria, para finalmente enviar la respuesta generada por la IA directamente al usuario en Slack.
+
+### Evidencias
+
+![alt text](image-7.png)
+
+![alt text](image-6.png)
+
+
+### 00933-telegram_baserow_ai_assistant
+
+### Que hace el flujo de trabajo?
+El flujo recibe mensajes de Telegram (texto, audio o imagen), valida que el usuario sea autorizado, enruta el mensaje según su tipo (transcribe el audio con Whisper, analiza imágenes con GPT-4o-mini, o procesa texto directamente), recupera memorias y notas previas almacenadas en Baserow, y se los pasa a un agente de IA (GPT-4o-mini) que responde de forma personalizada, pudiendo guardar automáticamente nuevas memorias o notas en Baserow y manteniendo el historial de conversación en PostgreSQL o memoria de ventana, para finalmente enviar la respuesta de vuelta al usuario por Telegram.
+
+### Evidencias
+
+# cuando se genera un error
+![alt text](image-8.png)
+
+# Prueba 1 — Texto
+en telegram se envia el mensaje de : Hola, mi nombre es Vanesa y estoy aprendiendo n8n
+![alt text](image-9.png)
+
+![alt text](image-10.png)
+
+
+# Prueba 2 — Audio
+En Telegram se envia el audio de: "Recuerda que estoy haciendo un proyecto con inteligencia artificial y automatización"
+![alt text](image-11.png)
+
+
+# Prueba 3 — Imagen
+Envía una imagen cualquiera.
+
+![alt text](image-12.png)
+
+![alt text](image-13.png)
+
+![alt text](image-14.png)
+
+
+---
+
+
+### 0717-rag-chatbot-docs
+
+### Que hace el flujo de trabajo?
+Este flujo tiene dos etapas principales: la primera toma documentos de una carpeta de Google Drive, los descarga, extrae su texto, usa Gemini para generar metadatos enriquecidos (temas, palabras clave, puntos de dolor, etc.), los divide en chunks con embeddings de OpenAI y los almacena en Qdrant como base de datos vectorial, con la opción adicional de eliminar registros previos de Qdrant previa confirmación humana vía Telegram; la segunda etapa expone un chatbot que recibe mensajes del usuario, consulta Qdrant usando RAG para recuperar contexto relevante, genera respuestas con Gemini 2.0 Flash manteniendo historial en memoria, y guarda el historial de conversación en Google Docs.
+
+### evidencias
+![alt text](image-15.png)
+
+la parte de telegram
+
+![alt text](image-16.png)
+
+en qdrant
+![alt text](image-17.png)
+
+mensaje que llega  a telegram si la persona decidida si contuna o no sobre borra ro no los datos de qdrant
+![alt text](image-18.png)
+
+![alt text](image-19.png)
+
+cuando la respuesta es no
+![alt text](image-20.png)
+
+![alt text](image-21.png)
+
+### evidencias del chat
+
+como se subio un documento de auditoria, se le pregunto acerca de ese dodcumento 
+El sistema procesa el documento, genera embeddings, almacena la información en Qdrant y permite que un agente de IA responda preguntas utilizando únicamente la información recuperada desde la base vectorial.
+
+se le cambio la descripccion al nodo de qdrant vector store para que pudiera saber
+Retrieve COBIT 2019 IT audit findings, risks, controls, and governance information from INCOLMA document.
+![alt text](image-22.png)
+
+![alt text](image-23.png)
+
+![alt text](image-24.png)
+
+![alt text](image-25.png)
+
+
+
+---
+
+
+### 00877-rag-peliculas-recomendacion-qdrant
+
+### Que hace el flujo de trabajo?
+Este flujo tiene dos partes: la primera carga el Top 1000 de películas IMDB desde GitHub, extrae el CSV, genera embeddings con OpenAI text-embedding-3-small y almacena los vectores con metadatos (nombre, año, descripción) en Qdrant; la segunda expone un chatbot con GPT-4o-mini que recibe mensajes del usuario, interpreta su solicitud extrayendo un ejemplo positivo (lo que quiere) y uno negativo (lo que no quiere), genera embeddings para ambos en paralelo, llama directamente a la API de recomendación de Qdrant usando la estrategia average_vector, recupera los metadatos de los 3 resultados, y devuelve las top 3 películas recomendadas ordenadas por score sin mostrárselo al usuario.
+
+![alt text](image-27.png)
+
+![alt text](image-28.png)
+
+
+---
+
+
+### 09308-Automate-security-incident-response
+
+### Que hace el flujo de trabajo?
+Este flujo se ejecuta automáticamente por un trigger programado, lee alertas de seguridad desde una hoja de Google Sheets (proveniente de una clasificación previa con GPT), filtra únicamente las alertas con severidad crítica, las agrega, envía un correo de alerta con formato HTML personalizado, registra todos los detalles en una hoja de incidentes centralizada y, opcionalmente (nodo deshabilitado), envía una solicitud POST a una API de EDR como CrowdStrike para aislar el endpoint comprometido.
+
+![alt text](image-29.png)
+
+![alt text](image-30.png)
+
+![alt text](image-31.png)
 
