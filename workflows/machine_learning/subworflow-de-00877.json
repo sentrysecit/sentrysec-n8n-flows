@@ -1,0 +1,402 @@
+{
+  "name": "subworflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c5bffb75-a70b-4e3f-bd2a-23cce5df69e0",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -2496,
+        192
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "afd01ff7-e7de-41d6-8464-2043782f0005",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -1584,
+        96
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "response",
+        "options": {}
+      },
+      "id": "051e5c33-f385-4dea-8ceb-4ef575724b21",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        -176,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "01a28c9d-aeb1-48bb-8a73-f8bddbd73460",
+              "name": "positive_example",
+              "type": "array",
+              "value": "={{ $json.data[0].embedding }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5863ac6f-d58d-4ce0-a751-8246f2313c4b",
+      "name": "Extracting Embedding",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1952,
+        64
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "01a28c9d-aeb1-48bb-8a73-f8bddbd73460",
+              "name": "negative_example",
+              "type": "array",
+              "value": "={{ $json.data[0].embedding }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "56581800-da0b-4422-95c8-4aee62545587",
+      "name": "Extracting Embedding1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1952,
+        256
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "Tool, calling Qdrant's recommendation API based on user's request, transformed by AI agent"
+      },
+      "id": "7dc5aca5-1c98-4db7-b7a7-6831f5ab37e6",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2576,
+        384
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://integrate.api.nvidia.com/v1/embeddings",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"input\": \"{{ $json.query.positive_example  || $json.query.negative_example || $json.query.positive_example}}\",\n  \"model\": \"nvidia/nv-embedqa-e5-v5\",\n  \"input_type\": \"query\"\n}\n\n{\n  \"input\": \"{{ $json.user_query }}\",\n  \"model\": \"nvidia/nv-embedqa-e5-v5\",\n  \"input_type\": \"query\"\n}",
+        "options": {}
+      },
+      "id": "dac427e8-5625-411f-b073-6a2d94027fc0",
+      "name": "NVIDIA Embedding (Positive)1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -2192,
+        80
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://integrate.api.nvidia.com/v1/embeddings",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"input\": \"{{ $json.query.negative_example }}\",\n  \"model\": \"nvidia/nv-embedqa-e5-v5\",\n  \"input_type\": \"query\"\n}",
+        "options": {}
+      },
+      "id": "593deafc-eb89-4178-a842-ae5a72b6e93a",
+      "name": "NVIDIA Embedding (Negative)1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -2192,
+        272
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const pos = $input.item.json.positive_example;\nconst neg = $input.item.json.negative_example;\n\n// Estrategia matemática de recomendación: restar el vector negativo al positivo\nconst combined = pos.map((val, idx) => val - neg[idx]);\n\nreturn { combined_vector: combined };"
+      },
+      "id": "4c0d35b6-318b-4546-be5e-b18eeb44486c",
+      "name": "Vector Math (Pos - Neg)",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1424,
+        192
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://prueba-qofgj97.svc.aped-4627-b74a.pinecone.io/query",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "pcsk_7NjiJK_Mcj3MgFjcPLSWNiZHvwQn4fxc9ZTiFbSGmrdZcRyfUpHntGah2j6ArVgV5mJVPF"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"vector\": {{ JSON.stringify($json.combined_vector) }},\n  \"topK\": 3,\n  \"includeMetadata\": true\n}",
+        "options": {}
+      },
+      "id": "0ed8d296-ad6d-4859-bc79-d941d0022e2b",
+      "name": "Query Pinecone Index",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1200,
+        192
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "matches",
+        "options": {}
+      },
+      "id": "bc233296-f4bf-4f31-9d7d-6be88df29f55",
+      "name": "Split Out Matches",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -960,
+        144
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b4b520a5-d0e2-4dcb-af9d-0b7748fd44d6",
+              "name": "movie_recommendation_score",
+              "type": "number",
+              "value": "={{ $json.score }}"
+            },
+            {
+              "id": "c9f0982e-bd4e-484b-9eab-7e69e333f706",
+              "name": "movie_description",
+              "type": "string",
+              "value": "={{ $json.metadata.movie_description }}"
+            },
+            {
+              "id": "7c7baf11-89cd-4695-9f37-13eca7e01163",
+              "name": "movie_name",
+              "type": "string",
+              "value": "={{ $json.metadata.movie_name }}"
+            },
+            {
+              "id": "1d1d269e-43c7-47b0-859b-268adf2dbc21",
+              "name": "movie_release_year",
+              "type": "string",
+              "value": "={{ $json.metadata.release_year }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0bc0e6a4-5b31-4871-a788-6702a99656cf",
+      "name": "Selecting Fields Relevant for Agent1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -704,
+        64
+      ],
+      "typeVersion": 3.4
+    }
+  ],
+  "pinData": {
+    "Execute Workflow Trigger": [
+      {
+        "json": {
+          "query": {
+            "negative_example": "horror bloody movie",
+            "positive_example": "romantic comedy"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "NVIDIA Embedding (Positive)1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "NVIDIA Embedding (Negative)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Vector Math (Pos - Neg)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extracting Embedding": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extracting Embedding1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "NVIDIA Embedding (Positive)1": {
+      "main": [
+        [
+          {
+            "node": "Extracting Embedding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NVIDIA Embedding (Negative)1": {
+      "main": [
+        [
+          {
+            "node": "Extracting Embedding1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Math (Pos - Neg)": {
+      "main": [
+        [
+          {
+            "node": "Query Pinecone Index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Pinecone Index": {
+      "main": [
+        [
+          {
+            "node": "Split Out Matches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Matches": {
+      "main": [
+        [
+          {
+            "node": "Selecting Fields Relevant for Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Selecting Fields Relevant for Agent1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "686b02f3-4038-4dfb-88de-741b414ef94f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9a601c79317ed2a1b31009eb83dd78854111e6da03d44c2816176c0a707ca9ed"
+  },
+  "nodeGroups": [],
+  "id": "g5Pg3DuRUrW5iLiC",
+  "tags": []
+}
