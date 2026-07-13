@@ -241,12 +241,3 @@ los registros se actualizaron, archivaron y purgaron de manera sincronizada en l
 
 ---
 
-
-
-## 07894-suspicious-login-detection
-
-
-#### No funcional: 
-El flujo no es funcional principalmente porque tiene componentes críticos apagados (disabled: true), como el webhook automático, las consultas a la base de datos Postgres y el envío por Gmail, lo que corta por completo la ruta de análisis histórico. Además, el nodo de condición Unknown threat? está incompleto al no definir contra qué comparar las variables de GreyNoise. Por último, existen errores en el mapeo de variables (como llamar context_ip a un campo guardado como ip), lo que causaría que los nodos posteriores procesen datos vacíos y fallen durante la ejecución.
-
-
